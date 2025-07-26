@@ -1,0 +1,104 @@
+body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    text-align: center;
+    background-color: #f0f8ff; /* 明るい水色 */
+    color: #333;
+}
+
+.screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: flex;
+}
+
+h1 {
+    font-size: 3rem;
+    color: #ff6347; /* トマト色 */
+}
+
+h2 {
+    font-size: 2.5rem;
+    color: #4682b4; /* スチールブルー */
+}
+
+button {
+    font-size: 1.8rem;
+    padding: 15px 30px;
+    margin: 15px;
+    border-radius: 20px;
+    border: 5px solid #fff;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 5px #999;
+    transition: all 0.1s;
+}
+
+button:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px #666;
+}
+
+#start-count-game, #start-order-game {
+    background-color: #32cd32; /* ライムグリーン */
+    color: white;
+}
+
+.back-to-menu {
+    background-color: #ffa500; /* オレンジ */
+    color: white;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+#count-question-area, #order-puzzle-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    margin: 20px;
+}
+
+#count-options-area {
+    margin-top: 20px;
+}
+
+#order-target-area {
+    border: 5px dashed #4682b4;
+    border-radius: 20px;
+    min-height: 150px;
+    width: 80%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+.vehicle-img {
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+}
+
+.train-car {
+    width: 100px;
+    height: 100px;
+    background-color: #ffd700; /* ゴールド */
+    border: 3px solid #8b4513; /* サドルブラウン */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 5px;
+    cursor: grab;
+}
