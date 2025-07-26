@@ -150,8 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (droppedCar.dataset.number != zone.dataset.correctNumber) {
                     isCorrect = false;
                 }
-            } else {
-                isCorrect = false;
             }
         });
 
