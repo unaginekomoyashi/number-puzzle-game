@@ -39,8 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackOverlay = document.getElementById('feedback-overlay');
     const feedbackIcon = document.getElementById('feedback-icon');
     const feedbackText = document.getElementById('feedback-text');
+    const countLevelDisplay = document.getElementById('count-level');
+    const orderLevelDisplay = document.getElementById('order-level');
     let countLevel = 1;
     let orderLevel = 1;
+
+    // 楽しいメッセージ
+    const successMessages = [
+        'すごいね！', 'よくできたね！', 'さすが！', 'かしこいね！', 
+        'がんばったね！', 'すばらしい！', 'やったね！', 'えらい！'
+    ];
+    const encourageMessages = [
+        'もういちど！', 'がんばって！', 'できるよ！', 'あとすこし！'
+    ];
 
     // --- かずをかぞえようゲームのロジック ---
     const countQuestionArea = document.getElementById('count-question-area');
@@ -51,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startCountGame() {
         countQuestionArea.innerHTML = '';
         countOptionsArea.innerHTML = '';
+        countLevelDisplay.textContent = countLevel;
         
         const maxItems = countLevel + 4; // レベルに応じて最大数が増える
         countCorrectAnswer = Math.floor(Math.random() * maxItems) + 1;
@@ -61,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             vehicleElement.textContent = vehicleType;
             vehicleElement.style.fontSize = '50px';
             vehicleElement.style.margin = '10px';
+            vehicleElement.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))';
             countQuestionArea.appendChild(vehicleElement);
         }
 
@@ -68,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         options.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
+            button.className = 'colorful-number';
             button.addEventListener('click', () => checkCountAnswer(option));
             countOptionsArea.appendChild(button);
         });
@@ -86,12 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function checkCountAnswer(selectedOption) {
         if (selectedOption === countCorrectAnswer) {
-            showFeedback(true, 'せいかい！');
+            const message = successMessages[Math.floor(Math.random() * successMessages.length)];
+            showFeedback(true, message);
             playSound('correct');
+            createCelebrationStars();
             countLevel++;
             setTimeout(startCountGame, 1500);
         } else {
-            showFeedback(false, 'ちがうよ');
+            const message = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
+            showFeedback(false, message);
             playSound('incorrect');
         }
     }
@@ -105,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startOrderGame() {
         orderPuzzleArea.innerHTML = '';
         orderTargetArea.innerHTML = '';
+        orderLevelDisplay.textContent = orderLevel;
         
         numToOrder = orderLevel + 3; // レベルに応じて数が増える
         const numbers = Array.from({ length: numToOrder }, (_, i) => i + 1);
@@ -130,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         shuffledNumbers.forEach(num => {
             const trainCar = document.createElement('div');
             trainCar.textContent = num;
-            trainCar.classList.add('train-car');
+            trainCar.classList.add('train-car', 'colorful-number');
             trainCar.draggable = true;
             trainCar.dataset.number = num;
             orderPuzzleArea.appendChild(trainCar);
@@ -155,15 +173,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (filledZones === numToOrder) {
             if (isCorrect) {
-                showFeedback(true, 'よくできました！');
+                const message = successMessages[Math.floor(Math.random() * successMessages.length)];
+                showFeedback(true, message);
                 playSound('correct');
+                createCelebrationStars();
                 orderLevel++;
                 setTimeout(startOrderGame, 1500);
             } else {
-                showFeedback(false, 'じゅんばんが ちがうよ');
+                const message = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
+                showFeedback(false, message);
                 playSound('incorrect');
                 setTimeout(startOrderGame, 1500);
             }
+        }
+    }
+
+    // --- お祝いエフェクト ---
+    function createCelebrationStars() {
+        for (let i = 0; i < 8; i++) {
+            const star = document.createElement('div');
+            star.textContent = '⭐';
+            star.className = 'celebration-star';
+            star.style.left = Math.random() * window.innerWidth + 'px';
+            star.style.top = Math.random() * window.innerHeight + 'px';
+            document.body.appendChild(star);
+            
+            setTimeout(() => {
+                if (star.parentNode) {
+                    star.parentNode.removeChild(star);
+                }
+            }, 1000);
         }
     }
 
