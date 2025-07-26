@@ -35,27 +35,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initially show the menu
     showScreen(menuScreen);
 
+    // --- ゲーム共通の変数 ---
+    const feedbackOverlay = document.getElementById('feedback-overlay');
+    const feedbackIcon = document.getElementById('feedback-icon');
+    const feedbackText = document.getElementById('feedback-text');
+    let countLevel = 1;
+    let orderLevel = 1;
+
     // --- かずをかぞえようゲームのロジック ---
     const countQuestionArea = document.getElementById('count-question-area');
     const countOptionsArea = document.getElementById('count-options-area');
-    const feedbackArea = document.getElementById('feedback-area');
-
-    // 仮の乗り物リスト（後で画像に差し替えます）
     const vehicles = ['🚗', '🚌', '🚚', '🚓', '🚑'];
-    let correctAnswer = 0;
+    let countCorrectAnswer = 0;
 
     function startCountGame() {
-        // エリアをクリア
         countQuestionArea.innerHTML = '';
         countOptionsArea.innerHTML = '';
-        feedbackArea.innerHTML = '';
-
-        // 1から5までのランダムな数を正解とする
-        correctAnswer = Math.floor(Math.random() * 5) + 1;
         
-        // ランダムな乗り物を正解の数だけ表示
+        const maxItems = countLevel + 4; // レベルに応じて最大数が増える
+        countCorrectAnswer = Math.floor(Math.random() * maxItems) + 1;
+        
         const vehicleType = vehicles[Math.floor(Math.random() * vehicles.length)];
-        for (let i = 0; i < correctAnswer; i++) {
+        for (let i = 0; i < countCorrectAnswer; i++) {
             const vehicleElement = document.createElement('div');
             vehicleElement.textContent = vehicleType;
             vehicleElement.style.fontSize = '50px';
@@ -63,37 +64,35 @@ document.addEventListener('DOMContentLoaded', () => {
             countQuestionArea.appendChild(vehicleElement);
         }
 
-        // 選択肢を作成
-        const options = generateOptions(correctAnswer);
+        const options = generateCountOptions(countCorrectAnswer, maxItems);
         options.forEach(option => {
             const button = document.createElement('button');
             button.textContent = option;
-            button.addEventListener('click', () => checkAnswer(option));
+            button.addEventListener('click', () => checkCountAnswer(option));
             countOptionsArea.appendChild(button);
         });
     }
 
-    function generateOptions(correct) {
+    function generateCountOptions(correct, max) {
         const options = [correct];
         while (options.length < 4) {
-            const wrongOption = Math.floor(Math.random() * 5) + 1;
+            const wrongOption = Math.floor(Math.random() * max) + 1;
             if (!options.includes(wrongOption)) {
                 options.push(wrongOption);
             }
         }
-        // 選択肢をシャッフル
         return options.sort(() => Math.random() - 0.5);
     }
 
-    function checkAnswer(selectedOption) {
-        if (selectedOption === correctAnswer) {
-            feedbackArea.textContent = 'せいかい！ 🎉';
-            feedbackArea.style.color = 'green';
-            // 1.5秒後に次の問題へ
+    function checkCountAnswer(selectedOption) {
+        if (selectedOption === countCorrectAnswer) {
+            showFeedback(true, 'せいかい！');
+            playSound('correct');
+            countLevel++;
             setTimeout(startCountGame, 1500);
         } else {
-            feedbackArea.textContent = 'ちがうよ、もういちど かんがえてみよう 🤔';
-            feedbackArea.style.color = 'red';
+            showFeedback(false, 'ちがうよ');
+            playSound('incorrect');
         }
     }
 
@@ -101,16 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const orderPuzzleArea = document.getElementById('order-puzzle-area');
     const orderTargetArea = document.getElementById('order-target-area');
     let draggedItem = null;
+    let numToOrder = 0;
 
     function startOrderGame() {
         orderPuzzleArea.innerHTML = '';
         orderTargetArea.innerHTML = '';
-        feedbackArea.innerHTML = '';
-
-        const numbers = [1, 2, 3, 4];
+        
+        numToOrder = orderLevel + 3; // レベルに応じて数が増える
+        const numbers = Array.from({ length: numToOrder }, (_, i) => i + 1);
         const shuffledNumbers = [...numbers].sort(() => Math.random() - 0.5);
 
-        // ドロップ先の線路を作成
         numbers.forEach(num => {
             const dropZone = document.createElement('div');
             dropZone.classList.add('train-car');
@@ -118,10 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dropZone.dataset.correctNumber = num;
             orderTargetArea.appendChild(dropZone);
 
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-            });
-
+            dropZone.addEventListener('dragover', (e) => e.preventDefault());
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 if (draggedItem && dropZone.children.length === 0) {
@@ -131,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // ドラッグする数字の電車を作成
         shuffledNumbers.forEach(num => {
             const trainCar = document.createElement('div');
             trainCar.textContent = num;
@@ -139,10 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             trainCar.draggable = true;
             trainCar.dataset.number = num;
             orderPuzzleArea.appendChild(trainCar);
-
-            trainCar.addEventListener('dragstart', (e) => {
-                draggedItem = e.target;
-            });
+            trainCar.addEventListener('dragstart', (e) => { draggedItem = e.target; });
         });
     }
 
@@ -159,14 +151,70 @@ document.addEventListener('DOMContentLoaded', () => {
                     isCorrect = false;
                 }
             } else {
-                isCorrect = false; // まだ全部埋まっていない
+                isCorrect = false;
             }
         });
 
-        if (filledZones === 4 && isCorrect) {
-            feedbackArea.textContent = 'せいかい！よくできました！ 🚂';
-            feedbackArea.style.color = 'green';
-            setTimeout(startOrderGame, 2000);
+        if (filledZones === numToOrder) {
+            if (isCorrect) {
+                showFeedback(true, 'よくできました！');
+                playSound('correct');
+                orderLevel++;
+                setTimeout(startOrderGame, 1500);
+            } else {
+                showFeedback(false, 'じゅんばんが ちがうよ');
+                playSound('incorrect');
+                setTimeout(startOrderGame, 1500);
+            }
         }
+    }
+
+    // --- 共通のフィードバック機能 ---
+    function showFeedback(isCorrect, message) {
+        feedbackIcon.textContent = isCorrect ? '😊' : '🤔';
+        feedbackText.textContent = message;
+        if (isCorrect) {
+            feedbackText.style.color = 'green';
+        } else {
+            feedbackText.style.color = 'red';
+        }
+        feedbackOverlay.classList.remove('hidden');
+
+        setTimeout(() => {
+            feedbackOverlay.classList.add('hidden');
+        }, 1200);
+    }
+
+    // --- サウンド機能 ---
+    let audioContext;
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+        console.error('Web Audio API is not supported in this browser');
+    }
+
+    function playSound(type) {
+        if (!audioContext) return;
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.01);
+
+        if (type === 'correct') {
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+        } else if (type === 'incorrect') {
+            oscillator.frequency.value = 200;
+            oscillator.type = 'square';
+        }
+
+        oscillator.start(audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+        oscillator.stop(audioContext.currentTime + 0.5);
     }
 });
