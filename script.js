@@ -5,9 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const startCountGameBtn = document.getElementById('start-count-game');
     const startOrderGameBtn = document.getElementById('start-order-game');
+    const startMathGameBtn = document.getElementById('start-math-game');
+    const mathGameScreen = document.getElementById('math-game-screen');
     const backToMenuBtns = document.querySelectorAll('.back-to-menu');
 
-    const screens = [menuScreen, countGameScreen, orderGameScreen];
+    const screens = [menuScreen, countGameScreen, orderGameScreen, mathGameScreen];
 
     function showScreen(screenToShow) {
         screens.forEach(screen => {
@@ -26,6 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
         startOrderGame();
     });
 
+    startMathGameBtn.addEventListener('click', () => {
+        showScreen(mathGameScreen);
+        startMathGame();
+    });
+
     backToMenuBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             showScreen(menuScreen);
@@ -41,8 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackText = document.getElementById('feedback-text');
     const countLevelDisplay = document.getElementById('count-level');
     const orderLevelDisplay = document.getElementById('order-level');
+    const mathLevelDisplay = document.getElementById('math-level');
     let countLevel = 1;
     let orderLevel = 1;
+    let mathLevel = 1;
 
     // 楽しいメッセージ
     const successMessages = [
@@ -102,14 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedOption === countCorrectAnswer) {
             const message = successMessages[Math.floor(Math.random() * successMessages.length)];
             showFeedback(true, message);
-            playSound('correct');
+            playMelody('correct');
             createCelebrationStars();
             countLevel++;
             setTimeout(startCountGame, 1500);
         } else {
             const message = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
             showFeedback(false, message);
-            playSound('incorrect');
+            playMelody('incorrect');
         }
     }
 
@@ -175,16 +184,80 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isCorrect) {
                 const message = successMessages[Math.floor(Math.random() * successMessages.length)];
                 showFeedback(true, message);
-                playSound('correct');
+                playMelody('correct');
                 createCelebrationStars();
                 orderLevel++;
                 setTimeout(startOrderGame, 1500);
             } else {
                 const message = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
                 showFeedback(false, message);
-                playSound('incorrect');
+                playMelody('incorrect');
                 setTimeout(startOrderGame, 1500);
             }
+        }
+    }
+
+    // --- さんすうゲームのロジック ---
+    const mathQuestionArea = document.getElementById('math-question-area');
+    const mathOptionsArea = document.getElementById('math-options-area');
+    let mathCorrectAnswer = 0;
+
+    function startMathGame() {
+        mathQuestionArea.innerHTML = '';
+        mathOptionsArea.innerHTML = '';
+        mathLevelDisplay.textContent = mathLevel;
+        
+        const maxNumber = mathLevel + 3; // レベルに応じて数が増える
+        const num1 = Math.floor(Math.random() * maxNumber) + 1;
+        const num2 = Math.floor(Math.random() * maxNumber) + 1;
+        
+        // 足し算または引き算をランダムに選択
+        const operation = Math.random() < 0.5 ? '+' : '-';
+        
+        if (operation === '+') {
+            mathCorrectAnswer = num1 + num2;
+            mathQuestionArea.innerHTML = `🚗 ${num1} + 🚚 ${num2} = ?`;
+        } else {
+            // 引き算は正の結果になるよう調整
+            const larger = Math.max(num1, num2);
+            const smaller = Math.min(num1, num2);
+            mathCorrectAnswer = larger - smaller;
+            mathQuestionArea.innerHTML = `🚗 ${larger} - 🚚 ${smaller} = ?`;
+        }
+
+        const options = generateMathOptions(mathCorrectAnswer);
+        options.forEach(option => {
+            const button = document.createElement('button');
+            button.textContent = option;
+            button.className = 'colorful-number';
+            button.addEventListener('click', () => checkMathAnswer(option));
+            mathOptionsArea.appendChild(button);
+        });
+    }
+
+    function generateMathOptions(correct) {
+        const options = [correct];
+        while (options.length < 4) {
+            const wrongOption = Math.max(0, correct + Math.floor(Math.random() * 6) - 3);
+            if (!options.includes(wrongOption)) {
+                options.push(wrongOption);
+            }
+        }
+        return options.sort(() => Math.random() - 0.5);
+    }
+
+    function checkMathAnswer(selectedOption) {
+        if (selectedOption === mathCorrectAnswer) {
+            const message = successMessages[Math.floor(Math.random() * successMessages.length)];
+            showFeedback(true, message);
+            playMelody('correct');
+            createCelebrationStars();
+            mathLevel++;
+            setTimeout(startMathGame, 1500);
+        } else {
+            const message = encourageMessages[Math.floor(Math.random() * encourageMessages.length)];
+            showFeedback(false, message);
+            playMelody('incorrect');
         }
     }
 
@@ -222,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200);
     }
 
-    // --- サウンド機能 ---
+    // --- 楽しい音楽機能 ---
     let audioContext;
     try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -230,28 +303,43 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Web Audio API is not supported in this browser');
     }
 
-    function playSound(type) {
+    function playMelody(type) {
         if (!audioContext) return;
 
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        const notes = {
+            'correct': [
+                { freq: 523.25, time: 0.0 },   // C5
+                { freq: 659.25, time: 0.15 },  // E5
+                { freq: 783.99, time: 0.3 },   // G5
+                { freq: 1046.5, time: 0.45 }   // C6
+            ],
+            'incorrect': [
+                { freq: 349.23, time: 0.0 },   // F4
+                { freq: 329.63, time: 0.2 },   // E4
+                { freq: 293.66, time: 0.4 }    // D4
+            ]
+        };
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        const melody = notes[type] || notes['correct'];
+        
+        melody.forEach(note => {
+            setTimeout(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
 
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.01);
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
 
-        if (type === 'correct') {
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-        } else if (type === 'incorrect') {
-            oscillator.frequency.value = 200;
-            oscillator.type = 'square';
-        }
+                oscillator.frequency.value = note.freq;
+                oscillator.type = 'sine';
 
-        oscillator.start(audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
-        oscillator.stop(audioContext.currentTime + 0.5);
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.15);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.15);
+            }, note.time * 1000);
+        });
     }
 });

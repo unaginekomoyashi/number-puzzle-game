@@ -44,9 +44,13 @@ button:active {
     box-shadow: 0 2px #666;
 }
 
-#start-count-game, #start-order-game {
+#start-count-game, #start-order-game, #start-math-game {
     background-color: #32cd32; /* ライムグリーン */
     color: white;
+}
+
+#start-math-game {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
 }
 
 .back-to-menu {
@@ -57,7 +61,7 @@ button:active {
     left: 20px;
 }
 
-#count-question-area, #order-puzzle-area {
+#count-question-area, #order-puzzle-area, #math-question-area {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -66,8 +70,18 @@ button:active {
     margin: 20px;
 }
 
-#count-options-area {
+#count-options-area, #math-options-area {
     margin-top: 20px;
+}
+
+#math-question-area {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #4682b4;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 #order-target-area {
@@ -153,13 +167,18 @@ button:active {
 
 /* Colorful Numbers */
 .colorful-number {
+    color: #333;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    border-radius: 15px;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+    border: 2px solid #fff;
 }
+
+.colorful-number:nth-child(1) { background: linear-gradient(45deg, #ff6b6b, #ff8e8e); }
+.colorful-number:nth-child(2) { background: linear-gradient(45deg, #4ecdc4, #7dd3d8); }
+.colorful-number:nth-child(3) { background: linear-gradient(45deg, #45b7d1, #74c0db); }
+.colorful-number:nth-child(4) { background: linear-gradient(45deg, #f9ca24, #fbdc5f); }
 
 /* Enhanced Train Cars */
 .train-car {
